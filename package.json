@@ -10,6 +10,9 @@
     "Other"
   ],
   "main": "src/extension.js",
+  "activationEvents": [
+    "onCommand:ai-bug-fixer.analyzeError"
+  ],
   "contributes": {
     "commands": [
       {

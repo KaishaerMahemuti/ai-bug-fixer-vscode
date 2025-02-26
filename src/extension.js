@@ -1,6 +1,9 @@
 const vscode = require("vscode");
 const axios = require("axios");
 
+/**
+ * Analyzes the selected error message (from terminal or editor).
+ */
 async function analyzeErrorMessage(errorMessage) {
     const openAiResponse = await getAIAnalysis(errorMessage);
     const stackOverflowResponse = await getStackOverflowSuggestions(errorMessage);
@@ -11,22 +14,25 @@ async function analyzeErrorMessage(errorMessage) {
     };
 }
 
+/**
+ * Sends the error log to OpenAI for debugging analysis.
+ */
 async function getAIAnalysis(errorMessage) {
     const apiKey = vscode.workspace.getConfiguration().get("aiBugFixer.openaiApiKey");
 
     if (!apiKey) {
         vscode.window.showErrorMessage("OpenAI API key is not set. Please configure it in VS Code settings.");
-        return "No API key found. Please set it in VS Code settings.";
+        return "No API key found.";
     }
 
     try {
         const response = await axios.post(
             "https://api.openai.com/v1/chat/completions",
             {
-                model: "gpt-4",
+                model: "gpt-3.5-turbo", // Changed to GPT-3.5 for wider access
                 messages: [
-                    { role: "system", content: "You are an expert software bug fixer." },
-                    { role: "user", content: `Analyze this error message: ${errorMessage}` }
+                    { role: "system", content: "You are an expert software bug fixer. Explain errors and suggest fixes." },
+                    { role: "user", content: `Analyze this error log and provide solutions: ${errorMessage}` }
                 ]
             },
             {
@@ -41,6 +47,9 @@ async function getAIAnalysis(errorMessage) {
     }
 }
 
+/**
+ * Fetches relevant solutions from Stack Overflow.
+ */
 async function getStackOverflowSuggestions(errorMessage) {
     try {
         const encodedQuery = encodeURIComponent(errorMessage);
@@ -56,31 +65,106 @@ async function getStackOverflowSuggestions(errorMessage) {
     }
 }
 
+/**
+ * Opens an interactive chat panel in VS Code.
+ */
+function openChatPanel(errorMessage) {
+    const panel = vscode.window.createWebviewPanel(
+        "aiBugFixerChat",
+        "AI Bug Fixer Chat",
+        vscode.ViewColumn.Beside,
+        { enableScripts: true }
+    );
+
+    panel.webview.html = getChatHtml(errorMessage);
+}
+
+/**
+ * Generates the HTML for the AI chat panel.
+ */
+function getChatHtml(errorMessage) {
+    return `
+    <html>
+    <body>
+        <h2>AI Debugging Chat</h2>
+        <p><strong>Error Log:</strong> ${errorMessage}</p>
+        <textarea id="userInput" style="width: 100%; height: 50px;" placeholder="Ask follow-up questions..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+        <div id="chatBox" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;"></div>
+        
+        <script>
+            function sendMessage() {
+                const userInput = document.getElementById("userInput").value;
+                const chatBox = document.getElementById("chatBox");
+                chatBox.innerHTML += "<p><strong>You:</strong> " + userInput + "</p>";
+
+                // Simulate AI response (should be replaced with actual API call)
+                setTimeout(() => {
+                    chatBox.innerHTML += "<p><strong>AI:</strong> Let me analyze that further...</p>";
+                }, 1000);
+            }
+        </script>
+    </body>
+    </html>`;
+}
+
+/**
+ * Extracts text from the VS Code terminal selection.
+ */
+async function getSelectedText() {
+    const editor = vscode.window.activeTextEditor;
+
+    if (editor) {
+        const selection = editor.selection;
+        if (!selection.isEmpty) {
+            return editor.document.getText(selection); // ✅ Capture text from editor selection
+        }
+    }
+
+    // ✅ If no text is selected, try reading from clipboard (useful for terminal logs)
+    const clipboardText = await vscode.env.clipboard.readText();
+    if (clipboardText.trim()) {
+        return clipboardText; // ✅ Use clipboard content if available
+    }
+
+    // ❌ If no selection or clipboard text, return an error
+    vscode.window.showErrorMessage("No error log selected. Please highlight an error in the editor or copy one from the terminal.");
+    return null;
+}
+
+
+/**
+ * Activates the extension and registers commands.
+ */
 function activate(context) {
     console.log('🚀 AI Bug Fixer Extension is now active!');
+
     let disposable = vscode.commands.registerCommand("ai-bug-fixer.analyzeError", async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage("No active editor found.");
+        const errorMessage = getSelectedText();
+        if (!errorMessage) {
+            vscode.window.showErrorMessage("No error log selected.");
             return;
         }
 
-        const selection = editor.selection;
-        const text = editor.document.getText(selection) || "No error message selected.";
+        vscode.window.showInformationMessage("Analyzing error log...");
 
-        vscode.window.showInformationMessage("Analyzing error message...");
-
-        const analysis = await analyzeErrorMessage(text);
+        const analysis = await analyzeErrorMessage(errorMessage);
         const stackOverflowLinks = analysis.stackOverflowLinks.map(link => `${link.title} - ${link.link}`);
 
         const result = ["AI Suggestion: " + analysis.aiSuggestions, ...stackOverflowLinks];
 
         vscode.window.showQuickPick(result, { placeHolder: "AI Bug Fixer Suggestions" });
+
+        // Open chat panel
+        openChatPanel(errorMessage);
     });
 
     context.subscriptions.push(disposable);
 }
 
+/**
+ * Deactivates the extension.
+ */
 function deactivate() {}
 
 module.exports = { activate, deactivate };
