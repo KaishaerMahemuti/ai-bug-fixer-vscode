@@ -2,7 +2,8 @@ const vscode = require("vscode");
 const axios = require("axios");
 
 /**
- * Analyzes the selected error message (from terminal or editor).
+ * Analyzes the selected error message from the editor or clipboard.
+ * Fetches AI-generated debugging suggestions and relevant Stack Overflow links.
  */
 async function analyzeErrorMessage(errorMessage) {
     const openAiResponse = await getAIAnalysis(errorMessage);
@@ -15,7 +16,7 @@ async function analyzeErrorMessage(errorMessage) {
 }
 
 /**
- * Sends the error log to OpenAI for debugging analysis.
+ * Sends the error log to OpenAI for debugging analysis and suggested fixes.
  */
 async function getAIAnalysis(errorMessage) {
     const apiKey = vscode.workspace.getConfiguration().get("aiBugFixer.openaiApiKey");
@@ -29,7 +30,7 @@ async function getAIAnalysis(errorMessage) {
         const response = await axios.post(
             "https://api.openai.com/v1/chat/completions",
             {
-                model: "gpt-3.5-turbo", // Changed to GPT-3.5 for wider access
+                model: "gpt-3.5-turbo",
                 messages: [
                     { role: "system", content: "You are an expert software bug fixer. Explain errors and suggest fixes." },
                     { role: "user", content: `Analyze this error log and provide solutions: ${errorMessage}` }
@@ -48,7 +49,7 @@ async function getAIAnalysis(errorMessage) {
 }
 
 /**
- * Fetches relevant solutions from Stack Overflow.
+ * Fetches relevant solutions from Stack Overflow based on the error message.
  */
 async function getStackOverflowSuggestions(errorMessage) {
     try {
@@ -66,7 +67,7 @@ async function getStackOverflowSuggestions(errorMessage) {
 }
 
 /**
- * Opens an interactive chat panel in VS Code.
+ * Opens an interactive chat panel in VS Code to provide AI debugging assistance.
  */
 function openChatPanel(errorMessage) {
     const panel = vscode.window.createWebviewPanel(
@@ -80,7 +81,7 @@ function openChatPanel(errorMessage) {
 }
 
 /**
- * Generates the HTML for the AI chat panel.
+ * Generates the HTML structure for the AI chat panel in VS Code.
  */
 function getChatHtml(errorMessage) {
     return `
@@ -109,7 +110,7 @@ function getChatHtml(errorMessage) {
 }
 
 /**
- * Extracts text from the VS Code terminal selection.
+ * Extracts text from the VS Code editor selection or clipboard (for terminal logs).
  */
 async function getSelectedText() {
     const editor = vscode.window.activeTextEditor;
@@ -117,30 +118,28 @@ async function getSelectedText() {
     if (editor) {
         const selection = editor.selection;
         if (!selection.isEmpty) {
-            return editor.document.getText(selection); // ✅ Capture text from editor selection
+            return editor.document.getText(selection);
         }
     }
 
-    // ✅ If no text is selected, try reading from clipboard (useful for terminal logs)
+    // If no selection, use clipboard content (for terminal logs)
     const clipboardText = await vscode.env.clipboard.readText();
     if (clipboardText.trim()) {
-        return clipboardText; // ✅ Use clipboard content if available
+        return clipboardText;
     }
 
-    // ❌ If no selection or clipboard text, return an error
     vscode.window.showErrorMessage("No error log selected. Please highlight an error in the editor or copy one from the terminal.");
     return null;
 }
 
-
 /**
- * Activates the extension and registers commands.
+ * Activates the extension and registers the "Analyze Error with AI" command.
  */
 function activate(context) {
-    console.log('🚀 AI Bug Fixer Extension is now active!');
+    console.log('AI Bug Fixer Extension is now active!');
 
     let disposable = vscode.commands.registerCommand("ai-bug-fixer.analyzeError", async () => {
-        const errorMessage = getSelectedText();
+        const errorMessage = await getSelectedText();
         if (!errorMessage) {
             vscode.window.showErrorMessage("No error log selected.");
             return;
@@ -168,3 +167,4 @@ function activate(context) {
 function deactivate() {}
 
 module.exports = { activate, deactivate };
+
