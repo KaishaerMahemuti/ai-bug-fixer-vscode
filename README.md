@@ -1,65 +1,124 @@
-# ai-bug-fixer README
+# **AI Bug Fixer - VS Code Extension**
 
-This is the README for your extension "ai-bug-fixer". After writing up a brief description, we recommend including the following sections.
+## **📌 Overview**
+**AI Bug Fixer** is a powerful **VS Code extension** that helps developers analyze and fix error messages using **OpenAI's API** and **Stack Overflow data**. It can process **syntax errors from the editor** and **runtime errors from the terminal**, offering **real-time debugging assistance** and an **interactive AI chat window**.
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+## **🚀 Features**
+✅ **AI-Powered Error Analysis** - Detects and explains errors in code.
+✅ **Works for Syntax & Runtime Errors** - Supports both editor errors and terminal logs.
+✅ **Stack Overflow Integration** - Fetches relevant solutions from Stack Overflow.
+✅ **Interactive AI Chat** - Users can ask follow-up debugging questions.
+✅ **Clipboard Support** - Copies terminal errors for analysis.
+✅ **VS Code Integration** - Works seamlessly within VS Code’s Command Palette.
 
 ---
 
-## Working with Markdown
+## **🛠 Installation**
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-username/ai-bug-fixer-vscode.git
+   cd ai-bug-fixer-vscode
+   ```
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+3. **Open the project in VS Code:**
+   ```sh
+   code .
+   ```
+4. **Run the extension in Debug Mode:**
+   - Press `F5` to launch the Extension Development Host.
+   - Open a file with errors and highlight an error message.
+   - Open the Command Palette (`Cmd + Shift + P` or `Ctrl + Shift + P`).
+   - Select **"Analyze Error with AI"**.
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+---
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+## **⚙️ Usage**
+### **🔍 Analyzing Errors from the Editor**
+1. Open a file with an error (e.g., `test.js`).
+2. Highlight the error message.
+3. Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows/Linux).
+4. Select **"Analyze Error with AI"**.
+5. AI will suggest fixes and explanations.
+6. An **interactive AI chat** window will open for further debugging.
 
-## For more information
+### **📌 Analyzing Runtime Errors from the Terminal**
+1. Run a command that produces an error in the terminal.
+2. **Manually copy** the error log (`Cmd + C` or `Ctrl + C`).
+3. Press `Cmd + Shift + P` (Mac) or `Ctrl + Shift + P` (Windows/Linux).
+4. Select **"Analyze Error with AI"**.
+5. The extension will analyze the **clipboard content**.
+6. AI-generated solutions and Stack Overflow links will be displayed.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+---
 
-**Enjoy!**
+## **🔗 API Integration**
+### **1️⃣ OpenAI API (ChatGPT)**
+- Used for **analyzing errors** and **providing AI-driven solutions**.
+- Requires an **OpenAI API key** (set in VS Code settings).
+
+### **2️⃣ Stack Overflow API**
+- Fetches **relevant questions & answers** related to the error.
+
+---
+
+## **⚠️ OpenAI API Setup**
+### **🔑 Adding Your API Key**
+1. **Get your API key** from [OpenAI API](https://platform.openai.com/account/api-keys).
+2. Open **VS Code settings (JSON Mode)** (`Cmd + Shift + P` → "Preferences: Open Settings (JSON)").
+3. Add this entry:
+   ```json
+   "aiBugFixer.openaiApiKey": "sk-YOUR-API-KEY"
+   ```
+4. **Restart VS Code**.
+
+### **💰 Managing API Limits**
+- If you receive a **429 Rate Limit error**, you may need to upgrade your OpenAI API plan.
+- Purchase API credits from [OpenAI Billing](https://platform.openai.com/account/billing).
+
+---
+
+## **🔧 Troubleshooting**
+| Issue | Solution |
+|--------|----------|
+| "Analyze Error with AI" not appearing | Restart VS Code & ensure the extension is activated. |
+| "No error log selected" | Copy the error log manually before running the command. |
+| OpenAI API error (429) | Check API limits and upgrade if necessary. |
+| Extension not activating | Ensure you have **VS Code 1.97.0 or later**. |
+
+---
+
+## **📜 License**
+This project is licensed under the **MIT License**.
+
+---
+
+## **📌 Future Improvements**
+🚀 **Enhance AI chat capabilities** - Enable real-time conversations.
+🚀 **Improve error detection** - Automatically differentiate syntax vs. runtime errors.
+🚀 **One-click "Apply Fix"** - AI will modify the code inside VS Code.
+🚀 **Better terminal integration** - Allow direct selection of terminal logs (if VS Code API supports it in the future).
+
+---
+
+## **👨‍💻 Contributing**
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature-branch`).
+3. Commit your changes (`git commit -m "Added new feature"`).
+4. Push to your branch (`git push origin feature-branch`).
+5. Open a Pull Request.
+
+We welcome all contributions to improve **AI Bug Fixer**!
+
+---
+
+## **🤝 Acknowledgments**
+Special thanks to:
+- **OpenAI** for providing powerful AI models.
+- **Stack Overflow** for its wealth of developer knowledge.
+- **VS Code API** for making extensions seamless.
+
+🚀 **Happy Coding!**
+
